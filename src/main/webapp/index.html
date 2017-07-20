@@ -1,0 +1,131 @@
+<html ng-app="questionnaireApp">
+  <head>
+    <meta charset="utf-8">
+    <title>Add Questions</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.5/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.5/angular-route.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="./angular-resource.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.25/angular-route.js"></script>
+	
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="./app.css" rel="stylesheet" type="text/css" />
+	
+	<script>
+      var questionnaireApp = angular.module('questionnaireApp', []);
+	  
+	 
+      questionnaireApp.controller('QuestionCtrller', function($scope, $http) {
+        $scope.questionsList = [];
+		var urlBase="";
+		$http.defaults.headers.post["Content-Type"] = "application/json";
+		
+		function findAllQns() {
+        //get all questions and display 
+        $http.get(urlBase + '/questions').
+            success(function (data) {
+                /*if (data._embedded != undefined) {
+                    $scope.tasks = data._embedded.tasks;
+                } else {
+                    $scope.tasks = [];
+                }
+                for (var i = 0; i < $scope.tasks.length; i++) {
+                    if ($scope.tasks[i].taskStatus == 'COMPLETED') {
+                        $scope.selection.push($scope.tasks[i].taskId);
+                    }
+                }
+                $scope.taskName="";
+                $scope.taskDesc="";
+                $scope.taskPriority="";
+                $scope.taskStatus="";
+                $scope.toggle='!toggle';*/
+            });
+    	} // end of all functions
+
+		$scope.addQuestionArea = function(objId) {		
+			var tmpAnsList = [];
+			tmpAnsList.push({"answerText":'',"timesClicked":1});
+			$scope.questionsList.push({"childAnsObjId":'', "parentAnsObjId":objId, "questionIndex": '', "questionText": '', "qType":'', "answers" : tmpAnsList});
+		} // end of addQuestionArea()
+
+		$scope.saveQuestions = function() {
+			//alert("in save ");
+			$http({
+				method : "POST",
+				url : "/questions",
+				data : angular.toJson($scope.questionsList),
+				headers : {'Content-Type' : 'application/json'}
+			}).then( _success, _error );                
+		  }  // end of saveQuestions()
+		  
+		function _success(response) {
+			console.log(response.statusText);
+			//$location.path('/questions.html');
+		}
+ 
+		function _error(response) {
+			console.log(response.statusText);
+		}
+		} // end of controller function definition
+		
+	  ); // end of controller definition
+	 
+    </script>
+  </head>
+  <body >
+	<div class="wrapper">
+        <h3 class="page-header">Add Questions</h3>
+	<form ng-controller="QuestionCtrller">
+		<div id="qnTemplate">			
+			<div ng-repeat="question in questionsList track by $index" >
+			<b>ID of the qn object : {{$id}}</b>
+			  	<div class="col-xs-3 padding-l-0">
+                    <div class="form-group">
+                        <select class="form-control" ng-model="question.qType"> 
+							<option value="1">Multiline
+							<option value="2">Single Choice
+							<option value="3">Multiple Choice
+						</select>
+                    </div>
+                </div>
+				
+				
+				<div class="col-xs-9">
+                    <div class="form-group col-xs-12">
+						<input type="hidden" ng-model="question.questionIndex" ng-value="{{question.questionIndex}}"/>
+						<input type="hidden" ng-model="question.parentAnsObjId" ng-value="{{question.parentAnsObjId}}"/>
+						<input class="form-control" type="text" ng-model='question.questionText' size="100" maxlength="500">
+					</div>
+					<div class="form-group col-xs-12" ng-repeat="answer in question.answers track by $index" ng-init="question.childAnsObjId =$id">
+						<b>ID of the answer object : {{question.childAnsObjId}}</b>
+						
+						<input type="hidden" ng-model="question.childAnsObjId" ng-value="question.childAnsObjId" />
+						<div ng-if="question.qType==1">
+						<textarea class="form-control" ng-model="answer.answerText" rows="5" cols="100" maxlength="500">&nbsp;</textarea>					
+						</div>
+						
+						<div>
+						<input class="pull-left form-control" ng-if="question.qType==2" type="text" ng-model="answer.answerText"/>
+						<input ng-if="question.qType==2" type="hidden" ng-model="answer.timesClicked" ng-value="{{answer.timesClicked}}"/>
+						<a class="pull-left" ng-if="question.qType==2" ng-click="addQuestionArea(question.childAnsObjId)">Add Subquestion</a>
+						</div>
+						<div class="checkbox margin-t-0">
+							<label>
+								<input ng-if="question.qType==3" type="checkbox"/>
+								<input ng-if="question.qType==3" type="text" class="form-control" ng-model="answer.answerText"/>
+							</label>
+						</div>
+					</div>
+				</div>
+			</div>
+			  
+		  <pre>{{ questionsList | json }}</pre>	
+		  <input class="btn" type="submit" value="Save" ng-click="saveQuestions()">
+		  <input class="btn" type="button" value="Cancel" ng-click="cancel()">
+		  <input class="btn" type="button" value="Add Question" ng-click="addQuestionArea('')">
+		</div>
+	</form>
+	</div>
+  </body>
+</html>
