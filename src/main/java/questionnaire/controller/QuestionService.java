@@ -31,6 +31,11 @@ public class QuestionService {
 	@Autowired
     AnsQuesMapRepository aqmRepository; 
 	
+	/**
+	 * Fetches the complete set of questions and re-establishes the association
+	 * between the single choice answers and their sub-questions.
+	 * @return Nested questions->answers list
+	 */
 	public Collection<Question> retrieveQns() {
 		// step 1 : fetch the list of all questions
 		List<Question> list = (List<Question>) qnRepository.findAll();
@@ -53,45 +58,15 @@ public class QuestionService {
 		Collection<Question> tmpList = qMap.values();
 		
         return tmpList;
-        
-		/*
-		// the logic for restructuring the list so that the question -> answer->subqns and so on....
-		// nesting is sdone appropriately.
-		
-		//step 2
-		// for quick searching we will convert the list of questions to Map
-		Map<Integer, Question> qMap = new HashMap<Integer, Question>();
-		Map<Integer, Answer> ansMap = new HashMap<Integer, Answer>();
-		for (Question q : list) {
-			qMap.put(q.getQuestionId(), q);
-			if (q.getAnswers().size() == 1) {
-				ansMap.put(q.getAnswers().get(0).getAnswerId(), q.getAnswers().get(0));
-			}
-		}
-		
-		// iterate the map of ans to subquestions
-		for (AnsQuesReln ansSubQ : ansQMap) {
-			Integer ansId = ansSubQ.getAnswerId();
-			
-			// retrieve the answer object in which the subquestions have to be associated
-			Answer tmpAns = ansMap.get(ansId);
-			if (tmpAns.getSubQuestions() == null) {
-				tmpAns.setSubQuestions(new ArrayList<Question>());
-			}
-			tmpAns.getSubQuestions().add(qMap.get(ansSubQ.getQuestionId()));
-			ansMap.put(ansId, tmpAns);
-			// remove ONLY the question object from the map of qns fetched in the step 2
-			qMap.remove(ansSubQ.getQuestionId());
-		}
-		
-		//step 3: the qMap obtained above is a complete set of questions with parent child 
-		// association set correctly between qns and answers and vice versa too.
-		Collection<Question> tmpList = qMap.values();
-		
-        return tmpList;
-        */
 	}
     
+	/**
+	 * Iterates through the list of questions saved to the database, determines the 
+	 * subquestions which have been defined for single choice answers and stores the 
+	 * mapping of answer->subquestion in the ANS_SUB_QUESTIONS table.
+	 * @param questionsList List of questions in which only Question/Subquestion to 
+	 * 			answer associated is stored.  
+	 */
     public void addAnsToSubQuesMapping(List<Question> questionsList) {
     	Answer answer = null;
     	for (Question q: questionsList) {
@@ -105,6 +80,13 @@ public class QuestionService {
     	}    
     }
     
+    /**
+     * Iterates through the list of questions to find the parent answser for a 
+     * particular subquestion given its parentAnsID(UI ID of the parent answer object)
+     * @param qList
+     * @param parentAnsId
+     * @return
+     */
     public Answer findAnswer(List<Question> qList, String parentAnsId) {    	
     	for (Question q: qList) {
     		if (q.getChildAnsObjId() != null && q.getChildAnsObjId().equalsIgnoreCase(parentAnsId)) {
@@ -114,6 +96,12 @@ public class QuestionService {
     	return null;
 	}
     
+    /**
+     * Saves questions, answers and the mapping of answer->subquestions in the 
+     * corresponding DB tables
+     * @param qnsList
+     * @return
+     */
     @Transactional
     public List<Question> saveQuestions(List<Question> qnsList) {
     	List<Question> list = (List<Question>)qnRepository.save(qnsList);
