@@ -11,6 +11,9 @@
 	
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link href="./app.css" rel="stylesheet" type="text/css" />
+
+	<link rel="stylesheet" href="bower_components/angular-ui-tree/dist/angular-ui-tree.min.css">
+	<script type="text/javascript" src="bower_components/angular-ui-tree/dist/angular-ui-tree.js"></script>
 	
 	<script>
       var questionnaireApp = angular.module('questionnaireApp', []);
@@ -79,7 +82,6 @@
 	<form ng-controller="QuestionCtrller">
 		<div id="qnTemplate">			
 			<div ng-repeat="question in questionsList track by $index" >
-			<b>ID of the qn object : {{$id}}</b>
 			  	<div class="col-xs-3 padding-l-0">
                     <div class="form-group">
                         <select class="form-control" ng-model="question.qType"> 
@@ -98,8 +100,6 @@
 						<input class="form-control" type="text" ng-model='question.questionText' size="100" maxlength="500">
 					</div>
 					<div class="form-group col-xs-12" ng-repeat="answer in question.answers track by $index" ng-init="question.childAnsObjId =$id">
-						<b>ID of the answer object : {{question.childAnsObjId}}</b>
-						
 						<input type="hidden" ng-model="question.childAnsObjId" ng-value="question.childAnsObjId" />
 						<div ng-if="question.qType==1">
 						<textarea class="form-control" ng-model="answer.answerText" rows="5" cols="100" maxlength="500">&nbsp;</textarea>					
@@ -120,12 +120,15 @@
 				</div>
 			</div>
 			  
-		  <pre>{{ questionsList | json }}</pre>	
+		  
 		  <input class="btn" type="submit" value="Save" ng-click="saveQuestions()">
 		  <input class="btn" type="button" value="Cancel" ng-click="cancel()">
 		  <input class="btn" type="button" value="Add Question" ng-click="addQuestionArea('')">
 		</div>
 	</form>
 	</div>
+	
+	<script src="./app.js"></script>
+
   </body>
 </html>
