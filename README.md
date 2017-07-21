@@ -1,6 +1,8 @@
 # AdvanzAssignment
 Questionnaire Assignment
 
+Three database table namely ANSWERS, QUESTIONS and ANS_SUB_QUESTIONS model the entity objects and their relations.
+
 To create the database run the script.sql in src/main/resources.
 
 From the directory where the project is located
