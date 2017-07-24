@@ -35,19 +35,17 @@
 					if (Object.is(v, questionObj)) {
 						alert(questionObj);
 						if (questionObj.answers.length == 1) {
-							alert('yes');
 							questionObj.answers.push({"answerText":''});
 							questionObj.answers.push({"answerText":''});
 						} 
 					}
 				});
 			} else {
-				$.each($scope.questionsList, function(k,v) {
-				//alert("before ");
+				$.each($scope.questionsList, function(k,v) {				
 					if (Object.is(v, questionObj)) {						
 						if (questionObj.answers.length > 1) {
-							alert('yay');
-							questionObj.answers.pop(); questionObj.answers.pop();
+							questionObj.answers.pop(); 
+							questionObj.answers.pop();
 						} 
 					}
 				});
