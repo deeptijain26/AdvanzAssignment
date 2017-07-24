@@ -16,7 +16,5 @@ mvn spring-boot:run
 
 4. Rest APIs : http://localhost:8080/questions. GET pulls the list of questions in JSON format. POST to the same API saves the list of questions added through Add questions page.
 
-Limitations/TODOs:
-1. Implement Cancel button functionality .
-2. Consume the the questions list obtained from the REST api so that it can be displayed in tree format.
-3. In multiple choice questions currently only once choice is presented to the user.
+5. Clicking on Cancel button in Add questions page takes the user to the questions tree display page.
+
