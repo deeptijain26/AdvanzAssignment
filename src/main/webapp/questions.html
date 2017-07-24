@@ -1,77 +1,44 @@
-<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<meta charset="utf-8">
-	<title>Questions</title>
-
-	<!-- Stylesheets -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Survey App</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="./angular-ui-tree/source/angular-ui-tree.css">
-	<link rel="stylesheet" href="css/app.css">
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.5/angular.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.5/angular-route.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.0/ui-bootstrap.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.0/ui-bootstrap-tpls.js"></script>
-
-	<script src="./angular-ui-tree/source/main.js"></script>
-	<script src="./angular-ui-tree/source/controllers/handleCtrl.js"></script>
-	<script src="./angular-ui-tree/source/controllers/nodeCtrl.js"></script>
-	<script src="./angular-ui-tree/source/controllers/nodesCtrl.js"></script>
-	<script src="./angular-ui-tree/source/controllers/treeCtrl.js"></script>
-	<script src="./angular-ui-tree/source/directives/uiTree.js"></script>
-	<script src="./angular-ui-tree/source/directives/uiTreeHandle.js"></script>
-	<script src="./angular-ui-tree/source/directives/uiTreeNode.js"></script>
-	<script src="./angular-ui-tree/source/directives/uiTreeNodes.js"></script>
-	<script src="./angular-ui-tree/source/services/helper.js"></script>
-
-	<script src="js/app.js"></script>
-	<script src="./angular-ui-tree/examples/js/basic-example.js"></script>
-	<script>
-	var demoApp = angular.module('demoApp', []);
-	
-	demoApp.controller('QnTreeCtrller', function($scope, $http) {
-	var questions = [];
-	
-	function findAllQns() {/*
-        //get all questions and display 
-		//alert("Inside findAllQns");
-        $http.get(urlBase + '/questions').
-            success(function (data) {
-                if (data._embedded != undefined) {
-					alert("Data recvd");
-                    $scope.questions = data._embedded.questions;
-					alert("Qns recvd");
-                } else {
-					alert("Data NOT recvd");
-                    $scope.questions = [];
-                }
-                for (var i = 0; i < $scope.questions.length; i++) {
-                    alert("Inside for loop");
-                }
-                
-            });*/
-    	} // end of all functions
-	
-		//alert("POPUP");
-		findAllQns();
-	}
-	</script>
+	<link href="./app.css" rel="stylesheet" type="text/css" />
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
-
-<body>
-<div class="container" ng-controller="QnTreeCtrller">
-  <div class="row">
-    <div class="col-sm-12">
-      <h2>Questions</h2>
-      <ng-view></ng-view>
-    </div>
-  </div>
-</div>
-<!--
-<script src="bower_components/angular/angular.min.js"></script>
-<script src="bower_components/angular-route/angular-route.min.js"></script>
-<script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
--->
-
+<body >
+	<div id="jstree_div"></div>
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+	<script>
+		var questionsList = [];
+		
+		function addQnNode(parentId, qnObj){
+			var nodeId = 'q' + qnObj.questionId;
+			questionsList.push({"id" : nodeId, "parent" : parentId, "text" : qnObj.questionText});
+			$.each(qnObj.answers, function(k,v) {
+				addAnsNode(nodeId,v);
+			});
+		};
+		
+		function addAnsNode(parentId, ansObj){
+		var nodeId = '' + ansObj.answerId;
+			questionsList.push({"id" : nodeId, "parent" : parentId, "text" : ansObj.answerText});
+			$.each(ansObj.subQuestions, function(k,v) {
+				addQnNode(nodeId,v);
+			});
+		};
+		
+		$.getJSON( "/questions", function( data ) {
+           	$.each( data, function( key, val ) {
+           	    addQnNode("#", val);				
+			});
+			$('#jstree_div').jstree({ 'core' : {'data' : questionsList } });
+					
+			
+		});
+	</script>
 </body>
-</html>

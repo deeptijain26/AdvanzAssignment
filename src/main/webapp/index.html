@@ -11,6 +11,9 @@
 	
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
     <link href="./app.css" rel="stylesheet" type="text/css" />
+
+	<link rel="stylesheet" href="bower_components/angular-ui-tree/dist/angular-ui-tree.min.css">
+	<script type="text/javascript" src="bower_components/angular-ui-tree/dist/angular-ui-tree.js"></script>
 	
 	<script>
       var questionnaireApp = angular.module('questionnaireApp', []);
@@ -18,37 +21,40 @@
 	 
       questionnaireApp.controller('QuestionCtrller', function($scope, $http) {
         $scope.questionsList = [];
-		var urlBase="";
-		$http.defaults.headers.post["Content-Type"] = "application/json";
-		
-		function findAllQns() {
-        //get all questions and display 
-        $http.get(urlBase + '/questions').
-            success(function (data) {
-                /*if (data._embedded != undefined) {
-                    $scope.tasks = data._embedded.tasks;
-                } else {
-                    $scope.tasks = [];
-                }
-                for (var i = 0; i < $scope.tasks.length; i++) {
-                    if ($scope.tasks[i].taskStatus == 'COMPLETED') {
-                        $scope.selection.push($scope.tasks[i].taskId);
-                    }
-                }
-                $scope.taskName="";
-                $scope.taskDesc="";
-                $scope.taskPriority="";
-                $scope.taskStatus="";
-                $scope.toggle='!toggle';*/
-            });
-    	} // end of all functions
 
 		$scope.addQuestionArea = function(objId) {		
 			var tmpAnsList = [];
-			tmpAnsList.push({"answerText":'',"timesClicked":1});
+			tmpAnsList.push({"answerText":''});
 			$scope.questionsList.push({"childAnsObjId":'', "parentAnsObjId":objId, "questionIndex": '', "questionText": '', "qType":'', "answers" : tmpAnsList});
 		} // end of addQuestionArea()
 
+		$scope.updateAnswerList = function(selectObj, questionObj) {
+		    
+			if (selectObj == 3 || selectObj == '3') {		
+				$.each($scope.questionsList, function(k,v) {
+					if (Object.is(v, questionObj)) {
+						alert(questionObj);
+						if (questionObj.answers.length == 1) {
+							alert('yes');
+							questionObj.answers.push({"answerText":''});
+							questionObj.answers.push({"answerText":''});
+						} 
+					}
+				});
+			} else {
+				$.each($scope.questionsList, function(k,v) {
+				//alert("before ");
+					if (Object.is(v, questionObj)) {						
+						if (questionObj.answers.length > 1) {
+							alert('yay');
+							questionObj.answers.pop(); questionObj.answers.pop();
+						} 
+					}
+				});
+			}
+			
+		} // end of updateAnswerList()
+ 
 		$scope.saveQuestions = function() {
 			//alert("in save ");
 			$http({
@@ -61,11 +67,15 @@
 		  
 		function _success(response) {
 			console.log(response.statusText);
-			//$location.path('/questions.html');
+			window.location.href = "/questions.html/";
 		}
  
 		function _error(response) {
 			console.log(response.statusText);
+		}
+		
+		$scope.cancel = function() {
+			window.location.href = "/questions.html/";
 		}
 		} // end of controller function definition
 		
@@ -79,10 +89,9 @@
 	<form ng-controller="QuestionCtrller">
 		<div id="qnTemplate">			
 			<div ng-repeat="question in questionsList track by $index" >
-			<b>ID of the qn object : {{$id}}</b>
 			  	<div class="col-xs-3 padding-l-0">
                     <div class="form-group">
-                        <select class="form-control" ng-model="question.qType"> 
+                        <select class="form-control" ng-model="question.qType" ng-change="updateAnswerList(question.qType,question)" onchange="updateAnswerList($event,question)">
 							<option value="1">Multiline
 							<option value="2">Single Choice
 							<option value="3">Multiple Choice
@@ -98,8 +107,6 @@
 						<input class="form-control" type="text" ng-model='question.questionText' size="100" maxlength="500">
 					</div>
 					<div class="form-group col-xs-12" ng-repeat="answer in question.answers track by $index" ng-init="question.childAnsObjId =$id">
-						<b>ID of the answer object : {{question.childAnsObjId}}</b>
-						
 						<input type="hidden" ng-model="question.childAnsObjId" ng-value="question.childAnsObjId" />
 						<div ng-if="question.qType==1">
 						<textarea class="form-control" ng-model="answer.answerText" rows="5" cols="100" maxlength="500">&nbsp;</textarea>					
@@ -107,7 +114,6 @@
 						
 						<div>
 						<input class="pull-left form-control" ng-if="question.qType==2" type="text" ng-model="answer.answerText"/>
-						<input ng-if="question.qType==2" type="hidden" ng-model="answer.timesClicked" ng-value="{{answer.timesClicked}}"/>
 						<a class="pull-left" ng-if="question.qType==2" ng-click="addQuestionArea(question.childAnsObjId)">Add Subquestion</a>
 						</div>
 						<div class="checkbox margin-t-0">
@@ -120,12 +126,15 @@
 				</div>
 			</div>
 			  
-		  <pre>{{ questionsList | json }}</pre>	
+		  
 		  <input class="btn" type="submit" value="Save" ng-click="saveQuestions()">
 		  <input class="btn" type="button" value="Cancel" ng-click="cancel()">
 		  <input class="btn" type="button" value="Add Question" ng-click="addQuestionArea('')">
 		</div>
 	</form>
 	</div>
+	
+	<script src="./app.js"></script>
+
   </body>
 </html>
